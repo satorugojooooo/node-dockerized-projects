@@ -10,7 +10,7 @@ pipeline {
         stage('Install Dependencies and Test') {
             steps {
                 script {
-                    // Ensure the system is updated and install npm
+                    // System update and install npm as root (if sudo is configured for passwordless)
                     sh 'sudo yum update -y'
                     sh 'sudo yum install -y npm'
                 }
