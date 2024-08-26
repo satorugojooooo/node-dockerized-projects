@@ -1,21 +1,27 @@
 pipeline {
     agent any
     stages {
-        stage("checkout") {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        stage("Test") {
+        
+        stage('Install Dependencies and Test') {
             steps {
-                sh 'sudo yum install npm'
+                script {
+                    // Ensure the system is updated and install npm
+                    sh 'sudo yum update -y'
+                    sh 'sudo yum install -y npm'
+                }
+                // Run tests using npm
                 sh 'npm test'
             }
         }
-
-        stage("Build") {
+        
+        stage('Build') {
             steps {
+                // Build the project
                 sh 'npm run build'
             }
         }
