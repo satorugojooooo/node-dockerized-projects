@@ -11,17 +11,9 @@ pipeline {
         stage('Install Dependencies and Test') {
             steps {
                 script {
-                    // System update (optional, be careful on production environments)
+                    // System update and install npm as root (if sudo is configured for passwordless)
                     sh 'sudo yum update -y'
-                    
-                    // Install Node.js and npm using nvm (recommended)
-                    sh '''
-                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
-                        . ~/.nvm/nvm.sh
-                        nvm install 16
-                        nvm use 16
-                        npm install
-                    '''
+                    sh 'sudo yum install -y npm'
                 }
                 // Run tests using npm
                 sh 'npm test'
@@ -45,8 +37,8 @@ pipeline {
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker_cred', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
-                    // Log in to DockerHub securely
-                    sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
+                    // Log in to DockerHub
+                    sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
                     
                     // Tag the Docker image
                     sh 'docker tag my-node-app:1.0 thirunavukkarasuj/my-node-app:1.0'
