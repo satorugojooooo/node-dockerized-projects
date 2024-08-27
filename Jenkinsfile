@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'your-docker-image'
-        }
-    }
+    agent any
 
     stages {
         stage('Checkout') {
@@ -14,6 +10,9 @@ pipeline {
 
         stage('Test') {
             steps {
+                // Install npm non-interactively
+                sh 'sudo apt-get update'
+                sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
                 sh 'npm test'
             }
         }
