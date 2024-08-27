@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -10,7 +10,9 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'sudo apt install npm'
+                // Install npm non-interactively
+                sh 'sudo apt-get update'
+                sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
                 sh 'npm test'
             }
         }
