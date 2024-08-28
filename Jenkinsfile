@@ -56,11 +56,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
                         export KUBECONFIG=\$KUBECONFIG
-                        kubectl apply -f k8s/deployment.yaml
-                        kubectl apply -f k8s/service.yaml
+                        kubectl apply -f k8s/deployment-and-service.yaml
                         kubectl rollout status deployment/my-node-app
                     """
                 }
