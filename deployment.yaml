@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-node-app
+  labels:
+    app: my-node-app
 spec:
-  replicas: 2
+  replicas: 3  # Number of pod replicas
   selector:
     matchLabels:
       app: my-node-app
@@ -14,19 +16,22 @@ spec:
     spec:
       containers:
       - name: my-node-app
-        image: jeevac33/my-node-app:1.0
+        image: jeevac33/my-node-app:1.0  # Replace with your Docker image name and tag
         ports:
-        - containerPort: 8080
+        - containerPort: 80  # Port that your application is listening on
+        env:
+        - name: NODE_ENV
+          value: "production"  # Example environment variable
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: my-node-app-service
 spec:
+  type: LoadBalancer
   selector:
     app: my-node-app
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: LoadBalancer
+      port: 80  # Port on which the service is exposed
+      targetPort: 80  # Port on which the application container is listening
