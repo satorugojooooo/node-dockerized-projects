@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // Environment variables can be defined here if needed
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -12,11 +8,12 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Test') {
             steps {
+                // Install npm non-interactively
                 sh 'sudo apt-get update'
                 sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
-                sh 'npm install'
+                sh 'npm test'
             }
         }
 
@@ -25,5 +22,5 @@ pipeline {
                 sh 'npm run build'
             }
         }
-    }
+    } 
 }
