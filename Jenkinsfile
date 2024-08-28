@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        KUBE_CONFIG = credentials('kubeconfig')  // Use Jenkins credentials for kubeconfig
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -47,6 +51,19 @@ pipeline {
                     chmod +x ./kubectl
                     ./kubectl version --client
                 """
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
+                    sh """
+                        export KUBECONFIG=\$KUBECONFIG
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        kubectl rollout status deployment/my-node-app
+                    """
+                }
             }
         }
     }
