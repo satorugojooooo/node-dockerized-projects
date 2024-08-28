@@ -53,16 +53,3 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                withKubeConfig([credentialsId: KUBE_CREDENTIALS_ID]) {
-                    script {
-                        def imageName = "${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-                        sh "kubectl set image deployment/${KUBE_DEPLOYMENT_NAME} ${KUBE_DEPLOYMENT_NAME}=${imageName}"
-                    }
-                }
-            }
-        }
-    }
-}
