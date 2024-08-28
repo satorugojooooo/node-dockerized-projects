@@ -14,7 +14,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                // Install npm non-interactively
                 sh 'sudo apt-get update'
                 sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
                 sh 'npm test'
@@ -57,8 +56,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl version --client'
                     sh """
-                        export KUBECONFIG=\$KUBECONFIG
                         kubectl apply -f k8s/deployment-and-service.yaml
                         kubectl rollout status deployment/my-node-app
                     """
