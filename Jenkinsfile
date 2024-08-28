@@ -43,7 +43,7 @@ pipeline {
         stage('Install kubectl') {
             steps {
                 sh """
-                    curl -LO https://storage.googleapis.com/kubernetes-release/release/\$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+                    curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.6/2024-07-12/bin/linux/amd64/kubectl
                     chmod +x ./kubectl
                     ./kubectl version --client
                 """
