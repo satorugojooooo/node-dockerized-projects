@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: react-app
+  name: my-node-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: react-app
+      app: my-node-app
   template:
     metadata:
       labels:
-        app: react-app
+        app: my-node-app
     spec:
       containers:
-      - name: react-app
-        image: my-node-app:1.0 
+      - name: my-node-app
+        image: jeevac33/my-node-app:1.0
         ports:
-        - containerPort: 80
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: react-app-service
+  name: my-node-app-service
 spec:
   selector:
-    app: react-app
+    app: my-node-app
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8080
   type: LoadBalancer
