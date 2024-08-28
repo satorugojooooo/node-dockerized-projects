@@ -1,6 +1,16 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE_NAME = 'my-node-app'
+        DOCKER_IMAGE_TAG = '1.0'
+        DOCKER_REGISTRY = 'jeevac33'
+        KUBE_DEPLOYMENT_NAME = 'my-node-app'
+        KUBE_NAMESPACE = 'default'
+        DOCKER_CREDENTIALS_ID = 'docker_cred'
+        KUBE_CREDENTIALS_ID = 'kubeconfig'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -10,7 +20,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                // Install npm non-interactively
                 sh 'sudo apt-get update'
                 sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
                 sh 'npm test'
@@ -23,19 +32,36 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker build -t my-node-app:1.0 .'
+                script {
+                    def imageName = "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                    sh "docker build -t ${imageName} ."
+                }
             }
         }
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker_cred', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
-                    sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
-                    sh 'docker tag my-node-app:1.0 jeevac33/my-node-app:1.0'
-                    sh 'docker push jeevac33/my-node-app:1.0'
-                    sh 'docker logout'
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                    script {
+                        def imageName = "${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                        sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD"
+                        sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${imageName}"
+                        sh "docker push ${imageName}"
+                        sh 'docker logout'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withKubeConfig([credentialsId: KUBE_CREDENTIALS_ID]) {
+                    script {
+                        def imageName = "${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                        sh "kubectl set image deployment/${KUBE_DEPLOYMENT_NAME} ${KUBE_DEPLOYMENT_NAME}=${imageName} -n ${KUBE_NAMESPACE}"
+                    }
                 }
             }
         }
