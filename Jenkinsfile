@@ -6,7 +6,6 @@ pipeline {
         DOCKER_IMAGE_TAG = '1.0'
         DOCKER_REGISTRY = 'jeevac33'
         KUBE_DEPLOYMENT_NAME = 'my-node-app'
-        KUBE_NAMESPACE = 'default'
         DOCKER_CREDENTIALS_ID = 'docker_cred'
         KUBE_CREDENTIALS_ID = 'kubeconfig'
     }
@@ -60,7 +59,7 @@ pipeline {
                 withKubeConfig([credentialsId: KUBE_CREDENTIALS_ID]) {
                     script {
                         def imageName = "${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-                        sh "kubectl set image deployment/${KUBE_DEPLOYMENT_NAME} ${KUBE_DEPLOYMENT_NAME}=${imageName} -n ${KUBE_NAMESPACE}"
+                        sh "kubectl set image deployment/${KUBE_DEPLOYMENT_NAME} ${KUBE_DEPLOYMENT_NAME}=${imageName}"
                     }
                 }
             }
