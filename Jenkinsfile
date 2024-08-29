@@ -55,6 +55,12 @@ pipeline {
             }
         }
 
+        stage('Verify Files') {
+            steps {
+                sh 'ls -R'  // List all files recursively to verify file locations
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
