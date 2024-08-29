@@ -1,11 +1,7 @@
 pipeline {
     agent any
-
-    environment {
-        KUBE_CONFIG = credentials('kubeconfig')  // Use Jenkins credentials for kubeconfig
-    }
-
-    stages {
+       
+        stages {
         stage('Checkout') {
             steps {
                 checkout scm
