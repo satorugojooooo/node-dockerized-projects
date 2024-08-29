@@ -6,7 +6,7 @@ pipeline {
             steps {
                 // Update kubeconfig to use the EKS cluster
                 sh """
-                    aws eks update-kubeconfig --region ap-south-1 --name ekscluster
+                    aws eks update-kubeconfig --region ap-south-1 --name jeeva-cluster
                 """
 
                 // Apply the Kubernetes deployment configuration
