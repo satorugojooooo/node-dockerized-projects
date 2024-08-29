@@ -12,10 +12,15 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Install Dependencies') {
             steps {
                 sh 'sudo apt-get update'
                 sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
+            }
+        }
+
+        stage('Test') {
+            steps {
                 sh 'npm test'
             }
         }
@@ -50,18 +55,6 @@ pipeline {
                     chmod +x ./kubectl
                     ./kubectl version --client
                 """
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl version --client'
-                    sh """
-                        kubectl apply -f k8s/deployment-and-service.yaml
-                        kubectl rollout status deployment/my-node-app
-                    """
-                }
             }
         }
     }
