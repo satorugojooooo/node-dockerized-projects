@@ -1,7 +1,7 @@
 pipeline {
     agent any
-       
-        stages {
+
+    stages {
         stage('Checkout') {
             steps {
                 checkout scm
@@ -51,6 +51,16 @@ pipeline {
                     chmod +x ./kubectl
                     ./kubectl version --client
                 """
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    // Optionally, you can check the status of your deployment
+                    sh 'kubectl rollout status deployment/my-node-app'
+                }
             }
         }
     }
