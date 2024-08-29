@@ -64,7 +64,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl apply -f deployment.yaml'
                     // Optionally, you can check the status of your deployment
                     sh 'kubectl rollout status deployment/my-node-app'
                 }
