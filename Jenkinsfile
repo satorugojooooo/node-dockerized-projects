@@ -1,38 +1,21 @@
 pipeline {
-    agent any  // Defines where the pipeline will run
-
+    agent any
+    
     stages {
-        stage('Checkout') {
+        stage('Deploy to Cluster') {
             steps {
-                checkout scm
-            }
-        }
+                // Update kubeconfig to use the EKS cluster
+                sh """
+                    aws eks update-kubeconfig --region ap-south-1 --name ekscluster
+                """
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'sudo apt-get update'
-                sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
-            }
-        }
+                // Apply the Kubernetes deployment configuration
+                sh """
+                    kubectl apply -f deployment.yaml
+                """
 
-        stage('Test') {
-            steps {
-                sh 'npm test'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'npm run build'
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: 'k8scred', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl apply -f deployment.yml'
-                    sh 'kubectl rollout status deployment/my-node-app'
-                }
+                // Optional: Verify the rollout status of the deployment
+                // sh "kubectl rollout status deployment/my-node-app-deployment"
             }
         }
     }
