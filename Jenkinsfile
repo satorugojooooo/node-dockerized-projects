@@ -47,9 +47,10 @@ pipeline {
         stage('Install kubectl') {
             steps {
                 sh """
-                    curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.6/2024-07-12/bin/linux/amd64/kubectl
+                    curl -LO https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.6/2024-07-12/bin/linux/amd64/kubectl
                     chmod +x ./kubectl
-                    ./kubectl version --client
+                    sudo mv ./kubectl /usr/local/bin/kubectl
+                    kubectl version --client
                 """
             }
         }
