@@ -2,22 +2,36 @@ pipeline {
     agent any
 
     environment {
-        dockerimagename = "thirunavukkarasuj/my-node-app"
-        dockerImage = ""
-        KUBECONFIG = '/home/ubuntu/.kube/config'
+        // Define the Kubernetes credentials ID (this is used for authentication)
+        KUBERNETES_CREDENTIALS_ID = 'k8scred'
+        // Define the Kubernetes cluster context if necessary
+        KUBE_CONTEXT = 'my-cluster-context' // Adjust this as needed
     }
 
     stages {
-        stage('Deploying App to Kubernetes') {
+        stage('Checkout') {
+            steps {
+                // Checkout the repository containing your deployment.yml
+                checkout scm
+            }
+        }
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Verify kubectl client version
-                    sh '/home/ubuntu/bin/kubectl version --client'
-                    
-                    // Apply Kubernetes deployment configuration
-                    sh '/home/ubuntu/bin/kubectl apply -f deployment.yml'
+                    // Ensure you have the Kubernetes CLI installed and configured
+                    withKubeConfig([credentialsId: "${KUBERNETES_CREDENTIALS_ID}", contextName: "${KUBE_CONTEXT}"]) {
+                        // Apply the deployment.yml file to the Kubernetes cluster
+                        sh 'kubectl apply -f deployment.yml'
+                    }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            // Clean up or perform any post-deployment steps if needed
+            echo 'Deployment process finished.'
         }
     }
 }
