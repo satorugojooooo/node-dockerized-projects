@@ -1,21 +1,42 @@
 pipeline {
     agent any
-    
+
     stages {
-        stage('Deploy to Cluster') {
+        stage('Checkout') {
             steps {
-                // Update kubeconfig to use the EKS cluster
-                sh """
-                    aws eks update-kubeconfig --region ap-south-1 --name jeeva-cluster
-                """
+                checkout scm
+            }
+        }
 
-                // Apply the Kubernetes deployment configuration
-                sh """
-                    kubectl apply -f deployment.yaml
-                """
+        stage('Test') {
+            steps {
+                // Install npm non-interactively
+                sh 'sudo apt-get update'
+                sh 'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y npm'
+                sh 'npm test'
+            }
+        }
 
-                // Optional: Verify the rollout status of the deployment
-                // sh "kubectl rollout status deployment/my-node-app-deployment"
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t my-node-app:1.0 .'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker_cred', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                    sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                    sh 'docker tag my-node-app:1.0 jeevac33/my-node-app:1.0'
+                    sh 'docker push jeevac33/my-node-app:1.0'
+                    sh 'docker logout'
+                }
             }
         }
     }
