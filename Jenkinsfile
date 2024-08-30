@@ -2,25 +2,32 @@ pipeline {
     agent any
 
     environment {
-        // Define the Kubernetes credentials ID (this is used for authentication)
         KUBERNETES_CREDENTIALS_ID = 'k8scred'
-        // Define the Kubernetes cluster context if necessary
-        KUBE_CONTEXT = 'my-cluster-context' // Adjust this as needed
+        KUBE_CONTEXT = 'my-cluster-context'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the repository containing your deployment.yml
                 checkout scm
+            }
+        }
+        stage('Install kubectl') {
+            steps {
+                script {
+                    sh '''
+                        curl -LO "https://dl.k8s.io/release/v1.27.3/bin/linux/amd64/kubectl"
+                        chmod +x ./kubectl
+                        sudo mv ./kubectl /usr/local/bin/kubectl
+                        kubectl version --client
+                    '''
+                }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Ensure you have the Kubernetes CLI installed and configured
                     withKubeConfig([credentialsId: "${KUBERNETES_CREDENTIALS_ID}", contextName: "${KUBE_CONTEXT}"]) {
-                        // Apply the deployment.yml file to the Kubernetes cluster
                         sh 'kubectl apply -f deployment.yml'
                     }
                 }
@@ -30,7 +37,6 @@ pipeline {
 
     post {
         always {
-            // Clean up or perform any post-deployment steps if needed
             echo 'Deployment process finished.'
         }
     }
