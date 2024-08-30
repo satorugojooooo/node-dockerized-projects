@@ -4,7 +4,7 @@ pipeline {
     environment {
         dockerimagename = "thirunavukkarasuj/my-node-app"
         dockerImage = ""
-        KUBECONFIG = '/home/ubuntu/.kube/config'
+        k8scred = '/home/ubuntu/.kube/config'
     }
 
     stages {
